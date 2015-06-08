@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"github.com/gorilla/websocket"
 	"log"
+	"fmt"
+	"encoding/json"
 )
 
 var upgrader = websocket.Upgrader{
@@ -24,8 +26,56 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	c.readPump()
 }
 
+var players = make([]*player, 0)
+
 func main() {
-	playersPool := make([]*player)
+
+	router.Add("register", func(data interface{}, c *connection) {
+		player := data.(player)
+
+		if player.Id == 0 {
+			player.Id = int32(len(players) + 1)
+			player.c = c
+			players = append(players, &player)
+
+			response := Response{
+				Method: "register",
+				Player: player,
+			}
+
+			resp, err := json.Marshal(response)
+
+			if err != nil {
+				fmt.Errorf("Error marshal response %v\n", err)
+				return
+			}
+
+			player.c.send <- resp
+			h.broadcast <- resp
+		}
+
+		fmt.Printf("Player %v\n", player)
+	})
+
+	router.Add("move", func(data interface{}, c *connection) {
+		player := data.(player)
+
+		respponse := Response{
+			Method: "move",
+			Player: player,
+		}
+
+		resp, err := json.Marshal(respponse)
+
+		if err != nil {
+			fmt.Errorf("Error marshal response %v\n", err)
+			return
+		}
+
+		h.broadcast <- resp
+	})
+
+	//playersPool := make([]*player, 0)
 	go h.run()
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/ws", handler)

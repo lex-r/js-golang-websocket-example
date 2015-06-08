@@ -2,7 +2,7 @@ var canvas;
 var context;
 var player;
 
-var players;
+var players = [];
 
 function gameLoop() {
 
@@ -15,7 +15,13 @@ function draw() {
     context.fillStyle="#FFF";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    player.draw(context);
+    if (player != undefined) {
+        player.draw(context);
+    }
+
+    for (var i = 0; i < players.length; i++) {
+        players[i].draw(context);
+    }
 }
 
 function update() {
@@ -50,8 +56,8 @@ function handleInput() {
     }
 }
 
-function Player(pos, size, speed) {
-    this.id = 0;
+function Player(id, pos, size, speed) {
+    this.id = id;
     this.pos = pos;
     this.size = size || 20;
     this.speed = speed || 4;

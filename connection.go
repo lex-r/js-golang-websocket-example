@@ -48,8 +48,9 @@ func (c *connection) readPump() {
 		if err != nil {
 			break
 		}
+		router.Dispatch(message, c)
 		fmt.Print("Read message\n")
-		h.broadcast <- message
+		//h.broadcast <- message
 	}
 }
 

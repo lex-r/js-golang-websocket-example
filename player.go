@@ -5,4 +5,5 @@ type player struct {
 	Pos []int32
 	Size int32
 	Speed int32
+	c *connection
 }
